@@ -9,12 +9,13 @@ const __dirname = path.resolve();
 import express from "express";
 import bodyParser from "body-parser";
 import ejs from "ejs";
-import md5 from "md5";
+import bcrypt from "bcrypt";
 
 import mongoose from 'mongoose';
 import _ from "lodash";
 
 const app = express();
+const saltRounds = 10;
 
 app.set("view engine", "ejs");
 app.use(bodyParser.urlencoded({extended:true}));
@@ -46,17 +47,20 @@ app.route("/login")
 
     .post((req,res) => {
         const username = req.body.username;
-        const password = md5(req.body.password);
+        const password = req.body.password;
 
         User.findOne({email: username}, (err, foundUser) => {
             if (err) {
                 console.log(err);
-            } else {
-                if (foundUser.password === password) {
-                    res.render("secrets");
-                }
-                else {
-
+            } else {               
+                if (foundUser) {
+                bcrypt.compare(password, foundUser.password, function(err, result) {
+                   if (result === true) {
+                        res.render("secrets");
+                    } else {
+                        console.log(err);
+                    }
+                    });
                 }
             }
         });
@@ -69,19 +73,23 @@ app.route("/register")
     })
 
     .post((req,res) => {
-        const newUser =  new User ({
-            email: req.body.username,
-            password: md5(req.body.password)
-        })
 
-        newUser.save((err) => {
-            if (!err) {
-                console.log("Successfully saved");
-                res.render("secrets");
-            } else {
-                console.log(err);
-            }
+        bcrypt.hash(req.body.password, saltRounds, function(err, hash) {
+            // Store hash in your password DB.
+            const newUser =  new User ({
+                email: req.body.username,
+                password: hash
+            })
+    
+            newUser.save((err) => {
+                if (!err) {
+                    res.render("secrets");
+                } else {
+                    console.log(err);
+                }
+            });
         });
+        
 });
 
 app.route("/logout")
