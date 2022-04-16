@@ -42,7 +42,8 @@ async function main() {
 const UserSchema = new mongoose.Schema({
   email: String,
   password: String,
-  googleId: String
+  googleId: String,
+  secret: String
  });
 
 UserSchema.plugin(passportLocalMongoose);
@@ -75,14 +76,17 @@ passport.use(new GoogleStrategy({
 ));
 
 app.route("/")
+
     .get((req,res) => {      
         res.render("home");
-});
+    });
 
 app.route("/auth/google")
+
     .get(passport.authenticate("google", {scope: [ "profile" ]}));
 
 app.route("/auth/google/secrets")
+
     .get(passport.authenticate('google', { failureRedirect: '/login' }),
     function(req, res) {
       // Successful authentication, redirect home.
@@ -114,13 +118,56 @@ app.route("/login")
     });
 
 app.route("/secrets")
+
+    // .get((req,res) => {
+    //    if (req.isAuthenticated()) {
+    //        res.render("secrets");
+    //    } else {
+    //        res.render("login");
+    //    }
+
     .get((req,res) => {
-       if (req.isAuthenticated()) {
-           res.render("secrets");
-       } else {
-           res.render("login");
-       }
-});
+
+        User.find({"secret":{$ne:null}}, (err, foundUsers) => {
+            if (err) {
+                console.log(err);
+            } else {
+                if (foundUsers) {
+                    res.render("secrets", {usersWithSecrets: foundUsers});
+                }
+            }
+        });
+    });
+
+app.route("/submit")
+
+    .get((req,res) => {
+        if (req.isAuthenticated()) {
+            res.render("submit");
+        } else {
+            res.render("login");
+        }
+    })
+
+    .post((req,res) => {
+        const submittedSecret = req.body.secret;
+        console.log(submittedSecret);
+
+        console.log(req.user._id);
+
+        User.findById(req.user._id, (err, foundUser) => {
+            if (err) {
+                console.log(err);
+            } else {
+                if (foundUser) {
+                    foundUser.secret = submittedSecret;
+                    foundUser.save(() => {
+                        res.redirect("/secrets");
+                    });
+                }
+            }
+        });
+    });
 
 app.route("/register")
 
