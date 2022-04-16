@@ -9,7 +9,7 @@ const __dirname = path.resolve();
 import express from "express";
 import bodyParser from "body-parser";
 import ejs from "ejs";
-import encrypt from 'mongoose-encryption';
+import md5 from "md5";
 
 import mongoose from 'mongoose';
 import _ from "lodash";
@@ -24,15 +24,13 @@ let port = 3000;
 main().catch(err => console.log(err));
 
 async function main() {
-  await mongoose.connect("mongodb://localhost:27017/userDB", {useNewUrlParser: true});
+  await mongoose.connect(process.env.URL, {useNewUrlParser: true});
 }
 
 const UserSchema = new mongoose.Schema({
   email: String,
   password: String
  });
-
-UserSchema.plugin(encrypt, { secret: process.env.SECRET_STRING, encryptedFields: ["password"] });
 
 const User = mongoose.model("User", UserSchema);
 
@@ -48,7 +46,7 @@ app.route("/login")
 
     .post((req,res) => {
         const username = req.body.username;
-        const password = req.body.password;
+        const password = md5(req.body.password);
 
         User.findOne({email: username}, (err, foundUser) => {
             if (err) {
@@ -73,7 +71,7 @@ app.route("/register")
     .post((req,res) => {
         const newUser =  new User ({
             email: req.body.username,
-            password: req.body.password
+            password: md5(req.body.password)
         })
 
         newUser.save((err) => {
