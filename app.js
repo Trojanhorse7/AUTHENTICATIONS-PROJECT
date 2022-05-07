@@ -62,7 +62,7 @@ passport.deserializeUser(function(user, done) {
     });
 
 passport.use(new GoogleStrategy({
-    clientID: process.env.CLIENT_id,
+    clientID: process.env.CLIENT_ID,
     clientSecret: process.env.CLIENT_SECRET,
     callbackURL: "http://localhost:3000/auth/google/secrets",
     // state: true
