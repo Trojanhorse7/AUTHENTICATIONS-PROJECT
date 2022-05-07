@@ -175,16 +175,10 @@ app.route("/register")
                 res.redirect("/register");
             } else {
                 passport.authenticate("local", { failureRedirect: "/register", failureMessage: true })(req, res, () =>{
-                    res.redirect("/secretss");
+                    res.redirect("https://simple-secrets-app.herokuapp.com/auth/google/secrets");
                 });
             }
         });
-    });
-
-app.route(".secretss")
-
-    .get((req,res) => {
-        res.render("secrets");
     });
 
 app.route("/logout")
