@@ -105,11 +105,11 @@ app.route("/login")
             password: req.body.password
         });
         
-        req.login(user, res, (err) => {
-            if (err, res) {
-                res.redirect("/login");
+        req.login(user, (err) => {
+            if (err) {
+                next(err)
             } else {
-                passport.authenticate("local")(req, res, () =>{
+                passport.authenticate("local", { failureRedirect: "/login", failureMessage: true })(req, res, () =>{
                     res.redirect("/secrets");
                 });
             }
