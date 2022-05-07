@@ -174,8 +174,8 @@ app.route("/register")
                 console.log(err);
                 res.redirect("/register");
             } else {
-                passport.authenticate("local")(req, res, () =>{
-                    res.redirect("/auth/google/secrets");
+                passport.authenticate("local", { failureRedirect: "/register", failureMessage: true })(req, res, () =>{
+                    res.redirect("/secrets");
                 });
             }
         });
