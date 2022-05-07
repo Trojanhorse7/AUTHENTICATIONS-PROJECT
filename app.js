@@ -68,7 +68,6 @@ passport.use(new GoogleStrategy({
     // state: true
 },
 function(accessToken, refreshToken, profile, cb) {
-    // console.log(profile);
     User.findOrCreate({ googleId: profile.id }, function (err, user) {
         return cb(err, user);
     });
@@ -106,8 +105,9 @@ app.route("/login")
             password: req.body.password
         });
         
-        req.login(user, (err) => {
-            if (err) {
+        req.login(user, res, (err) => {
+            if (err, res) {
+                res.redirect("/login");
                 console.log(err);
             } else {
                 passport.authenticate("local")(req, res, () =>{
@@ -118,13 +118,6 @@ app.route("/login")
     });
 
 app.route("/secrets")
-
-    // .get((req,res) => {
-    //    if (req.isAuthenticated()) {
-    //        res.render("secrets");
-    //    } else {
-    //        res.render("login");
-    //    }
 
     .get((req,res) => {
 
