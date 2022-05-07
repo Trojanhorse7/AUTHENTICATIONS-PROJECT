@@ -28,7 +28,7 @@ app.use(session({
     secret: 'Authentications',
     resave: false,
     saveUninitialized: false,
-  }));
+    }));
 
 app.use(passport.initialize());
 app.use(passport.session());
@@ -36,15 +36,15 @@ app.use(passport.session());
 main().catch(err => console.log(err));
 
 async function main() {
-  await mongoose.connect(process.env.URL, {useNewUrlParser: true});
+    await mongoose.connect(process.env.URL, {useNewUrlParser: true});
 }
 
 const UserSchema = new mongoose.Schema({
-  email: String,
-  password: String,
-  googleId: String,
-  secret: String
- });
+    email: String,
+    password: String,
+    googleId: String,
+    secret: String
+    });
 
 UserSchema.plugin(passportLocalMongoose);
 UserSchema.plugin(findOrCreate);
@@ -55,24 +55,24 @@ passport.use(User.createStrategy());
 
 passport.serializeUser(function(user, done) {
     done(null, user);
-  });
-  
+    });
+
 passport.deserializeUser(function(user, done) {
     done(null, user);
-  });
+    });
 
 passport.use(new GoogleStrategy({
     clientID: process.env.CLIENT_id,
     clientSecret: process.env.CLIENT_SECRET,
     callbackURL: "http://localhost:3000/auth/google/secrets",
     // state: true
-  },
-  function(accessToken, refreshToken, profile, cb) {
-    console.log(profile);
+},
+function(accessToken, refreshToken, profile, cb) {
+    // console.log(profile);
     User.findOrCreate({ googleId: profile.id }, function (err, user) {
-      return cb(err, user);
+        return cb(err, user);
     });
-  }
+}
 ));
 
 app.route("/")
@@ -90,7 +90,7 @@ app.route("/auth/google/secrets")
     .get(passport.authenticate('google', { failureRedirect: '/login' }),
     function(req, res) {
       // Successful authentication, redirect home.
-      res.redirect('/secrets');
+    res.redirect('/secrets');
     });
 
 app.route("/login")
@@ -151,9 +151,6 @@ app.route("/submit")
 
     .post((req,res) => {
         const submittedSecret = req.body.secret;
-        console.log(submittedSecret);
-
-        console.log(req.user._id);
 
         User.findById(req.user._id, (err, foundUser) => {
             if (err) {
@@ -201,5 +198,5 @@ app.route("/logout")
     });
 
 app.listen(process.env.PORT || port, () => { 
-  console.log(`Server started on port ${process.env.PORT || port}`);
+    console.log(`Server started on port ${process.env.PORT || port}`);
 });
