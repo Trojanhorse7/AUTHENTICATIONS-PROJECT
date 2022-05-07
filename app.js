@@ -83,7 +83,7 @@ app.route("/")
 
 app.route("/auth/google")
 
-    .get(passport.authenticate("google", {scope: [ "profile" ]}));
+    .get(passport.authenticate("google", {scope: [ "profile","email" ]}));
 
 app.route("/auth/google/secrets")
 
