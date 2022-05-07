@@ -108,7 +108,6 @@ app.route("/login")
         req.login(user, res, (err) => {
             if (err, res) {
                 res.redirect("/login");
-                console.log(err);
             } else {
                 passport.authenticate("local")(req, res, () =>{
                     res.redirect("/secrets");
